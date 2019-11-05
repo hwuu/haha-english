@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+ 
+<head>
+  <!-- TODO: Remove these files from the 'static' folder.
+  <script src="/static/jquery-1.11.0.min.js"></script>
+  <script src="/static/moment.min.js"></script>
+  <link href="/static/bootstrap.min.css" rel="stylesheet">
+  -->
+  <link href="https://fonts.googleapis.com/css?family=Cardo" rel="stylesheet">
+</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<body>
+ <title>BB - Haha English</title>
+ <div class="container">
+    <div style="text-align:left">
+      <br>
+      <h1 class="text-muted">BB - Haha English</h1>
+      <span class="text-muted" id="statusArea"></span>
+      <h1></h1>
+      <br>
+      <span id="resultArea" style="position:relative; font-family:'Cardo', serif;"></span>
+      <button type="button" id="finish" onclick="submitResult()">Finish</button>
+      <br><br>
+      <span class="text-muted">
+        <font size='1'>
+          Copyright (C) 2017 Haha English, Inc. Contact:
+          <a href='mailto:micw.mm@gmail.com'>Hao Wu</a>
+        </font>
+      </span>
+    </div>
+  </div>
+</body>
+
+<script type=text/javascript>
+
+//
+///
+//
+
+var _date = "";
+
+//
+///
+//
+
+$(function() {
+  $.getJSON("/get", null, displayElements);
+});
+
+//
+///
+//
+
+function displayElements(result) {
+  //
+  _date = result["date"];
+  $("#statusArea").html(_date);
+  //
+  var elements = result["elements"];
+  var s = "";
+  s += "<table width='100%' cellpadding=6 border=0 valign='top'>" +
+    "<tbody>";
+  for (var i = 0; i < elements.length; i++) {
+    s += "<tr><td>" +
+      "<font size=4>(" + (i + 1) + " of "+ elements.length + ") " +
+      elements[i]["text"] + "</font><br><br>" +
+      "<input type='checkbox' value='" + i + "'" +
+      (elements[i]["like"] ? " checked" : "") +
+      ">" +
+      "&nbsp; I like it.<br><br><br>" +
+      "</td></tr>";
+  }
+  s += "<tr></tr>";
+  s += "</tbody></table>";
+  $("#resultArea").html(s);
+  //
+  if (result["finished"] == true) {
+    showConfirmation();
+  }
+}
+
+//
+///
+//
+
+function submitResult() {
+  var checkedIds = $("input:checkbox:checked").map(function(){
+    return $(this).val();
+  }).get();
+  if (confirm("Press 'OK' to submit your result.")) {
+    $.getJSON("/log", {"checkedIds": checkedIds.toString()}, showConfirmation);
+  } else {
+    // Do nothing.
+  }
+}
+
+//
+///
+//
+
+function showConfirmation(result) {
+  if (result != null && result["status"] != 0) {
+    alert("Error.");
+    return;
+  }
+  $("#statusArea").html(_date + " - Finished");
+  $("#finish").prop('disabled', true);
+  $("input:checkbox").prop('disabled', true);
+}
+
+//
+///
+//
+
+</script>
+
+</html>
+
